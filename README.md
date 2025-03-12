@@ -1,15 +1,16 @@
 # Morss - Get full-text RSS feeds
 
---- 
+---
 
 ## Note for this Fork
 
 This is a fork to attempt to try to update everything to modern. I don't plan on implementing features, but PRs are welcome.
+Main focus will be the docker image.
 
 ---
 
-[Homepage](https://morss.it/) • 
-[Upstream source code](https://git.pictuga.com/pictuga/morss) • 
+[Homepage](https://morss.it/) •
+[Upstream source code](https://git.pictuga.com/pictuga/morss) •
 [Github mirror](https://github.com/pictuga/morss) (for Issues & Pull requests)
 
 [![Build Status](https://ci.pictuga.com/api/badges/pictuga/morss/status.svg)](https://ci.pictuga.com/pictuga/morss)

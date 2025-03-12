@@ -1,22 +1,15 @@
 import os
 import os.path
 import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer, SimpleHTTPRequestHandler
 
 import pytest
 
-try:
-    # python2
-    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-    from SimpleHTTPServer import SimpleHTTPRequestHandler
-except:
-    # python3
-    from http.server import (BaseHTTPRequestHandler, HTTPServer,
-                             SimpleHTTPRequestHandler)
 
 class HTTPReplayHandler(SimpleHTTPRequestHandler):
-    " Serves pages saved alongside with headers. See `curl --http1.1 -is http://...` "
+    "Serves pages saved alongside with headers. See `curl --http1.1 -is http://...`"
 
-    directory = os.path.join(os.path.dirname(__file__), './samples/')
+    directory = os.path.join(os.path.dirname(__file__), "./samples/")
 
     __init__ = BaseHTTPRequestHandler.__init__
 
@@ -27,7 +20,7 @@ class HTTPReplayHandler(SimpleHTTPRequestHandler):
             f = self.list_directory(path)
 
         else:
-            f = open(path, 'rb')
+            f = open(path, "rb")
 
         try:
             self.copyfile(f, self.wfile)
@@ -35,14 +28,17 @@ class HTTPReplayHandler(SimpleHTTPRequestHandler):
         finally:
             f.close()
 
+
 class MuteHTTPServer(HTTPServer):
     def handle_error(self, request, client_address):
         # mute errors
         pass
 
+
 def make_server(port=8888):
-    print('Serving http://localhost:%s/' % port)
-    return MuteHTTPServer(('', port), RequestHandlerClass=HTTPReplayHandler)
+    print(f"Serving http://localhost:{port}/")
+    return MuteHTTPServer(("", port), RequestHandlerClass=HTTPReplayHandler)
+
 
 @pytest.fixture
 def replay_server():
@@ -55,6 +51,7 @@ def replay_server():
     httpd.shutdown()
     thread.join()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     httpd = make_server()
     httpd.serve_forever()

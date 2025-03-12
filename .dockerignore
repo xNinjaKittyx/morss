@@ -1,0 +1,6 @@
+.ruff_cache/
+.github/
+*.pyc
+*.pyo
+.venv/
+tests/

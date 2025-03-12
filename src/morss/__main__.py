@@ -21,11 +21,10 @@ import os
 import sys
 
 from . import cli, wsgi
-from .morss import MorssException
 
 
 def main():
-    if 'REQUEST_URI' in os.environ:
+    if "REQUEST_URI" in os.environ:
         # mod_cgi (w/o file handler)
         wsgi.cgi_handle_request()
 
@@ -42,7 +41,8 @@ def main():
             raise
 
         except Exception as e:
-            print('ERROR: %s' % e.message)
+            print(f"ERROR: {e.message}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

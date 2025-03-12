@@ -36,15 +36,15 @@ def data_path(*path_elements):
         return os.path.join(data_path_base, path)
 
     bases = [
-        os.path.join(sys.prefix, 'share/morss'), # when installed as root
-        pkg_path('../../../share/morss'), 
-        pkg_path('../../../../share/morss'),
-        pkg_path('../share/morss'), # for `pip install --target=dir morss`
-        pkg_path('..'), # when running from source tree
+        os.path.join(sys.prefix, "share/morss"),  # when installed as root
+        pkg_path("../../../share/morss"),
+        pkg_path("../../../../share/morss"),
+        pkg_path("../share/morss"),  # for `pip install --target=dir morss`
+        pkg_path(".."),  # when running from source tree
     ]
 
-    if 'DATA_PATH' in os.environ:
-        bases.append(os.environ['DATA_PATH'])
+    if "DATA_PATH" in os.environ:
+        bases.append(os.environ["DATA_PATH"])
 
     for base in bases:
         full_path = os.path.join(base, path)
@@ -54,4 +54,4 @@ def data_path(*path_elements):
             return data_path(path)
 
     else:
-        raise IOError()
+        raise OSError()

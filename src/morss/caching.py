@@ -17,15 +17,24 @@
 
 import os
 import threading
-import time
 from collections import OrderedDict
 
-CACHE_SIZE = int(os.getenv('CACHE_SIZE', 1000)) # max number of items in cache (default: 1k items)
-CACHE_LIFESPAN = int(os.getenv('CACHE_LIFESPAN', 60)) # how often to auto-clear the cache (default: 1min)
+try:
+    import redis
+except ImportError:
+    pass
+
+try:
+    import diskcache
+except ImportError:
+    pass
+
+CACHE_SIZE = int(os.getenv("CACHE_SIZE", 1000))  # max number of items in cache (default: 1k items)
+CACHE_LIFESPAN = int(os.getenv("CACHE_LIFESPAN", 60))  # how often to auto-clear the cache (default: 1min)
 
 
 class BaseCache:
-    """ Subclasses must behave like a dict """
+    """Subclasses must behave like a dict"""
 
     def trim(self):
         pass
@@ -53,7 +62,7 @@ class BaseCache:
 class CappedDict(OrderedDict, BaseCache):
     def trim(self):
         if CACHE_SIZE >= 0:
-            for i in range( max( len(self) - CACHE_SIZE , 0 )):
+            for i in range(max(len(self) - CACHE_SIZE, 0)):
                 self.popitem(False)
 
     def __setitem__(self, key, data):
@@ -63,14 +72,8 @@ class CappedDict(OrderedDict, BaseCache):
         OrderedDict.__setitem__(self, key, data)
 
 
-try:
-    import redis # isort:skip
-except ImportError:
-    pass
-
-
 class RedisCacheHandler(BaseCache):
-    def __init__(self, host='localhost', port=6379, db=0, password=None):
+    def __init__(self, host="localhost", port=6379, db=0, password=None):
         self.r = redis.Redis(host=host, port=port, db=db, password=password)
 
     def __getitem__(self, key):
@@ -80,15 +83,9 @@ class RedisCacheHandler(BaseCache):
         self.r.set(key, data)
 
 
-try:
-    import diskcache # isort:skip
-except ImportError:
-    pass
-
-
 class DiskCacheHandler(BaseCache):
     def __init__(self, directory=None, **kwargs):
-        self.cache = diskcache.Cache(directory=directory, eviction_policy='least-frequently-used', **kwargs)
+        self.cache = diskcache.Cache(directory=directory, eviction_policy="least-frequently-used", **kwargs)
 
     def __del__(self):
         self.cache.close()
@@ -103,20 +100,20 @@ class DiskCacheHandler(BaseCache):
         self.cache.set(key, data)
 
 
-if 'CACHE' in os.environ:
-    if os.environ['CACHE'] == 'redis':
+if "CACHE" in os.environ:
+    if os.environ["CACHE"] == "redis":
         default_cache = RedisCacheHandler(
-            host = os.getenv('REDIS_HOST', 'localhost'),
-            port = int(os.getenv('REDIS_PORT', 6379)),
-            db = int(os.getenv('REDIS_DB', 0)),
-            password = os.getenv('REDIS_PWD', None)
+            host=os.getenv("REDIS_HOST", "localhost"),
+            port=int(os.getenv("REDIS_PORT", 6379)),
+            db=int(os.getenv("REDIS_DB", 0)),
+            password=os.getenv("REDIS_PWD", None),
         )
 
-    elif os.environ['CACHE'] == 'diskcache':
+    elif os.environ["CACHE"] == "diskcache":
         default_cache = DiskCacheHandler(
-            directory = os.getenv('DISKCACHE_DIR', '/tmp/morss-diskcache'),
-            size_limit = CACHE_SIZE # in Bytes
+            directory=os.getenv("DISKCACHE_DIR", "/tmp/morss-diskcache"),
+            size_limit=CACHE_SIZE,  # in Bytes
         )
 
 else:
-        default_cache = CappedDict()
+    default_cache = CappedDict()

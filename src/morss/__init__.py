@@ -21,5 +21,5 @@
 
 __version__ = ""
 
-from .morss import *
-from .wsgi import application
+from .morss import *  # noqa: F403
+from .wsgi import application  # noqa: F401

@@ -18,7 +18,6 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from morss.__main__ import main
-from morss.wsgi import application
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
