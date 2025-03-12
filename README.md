@@ -1,5 +1,13 @@
 # Morss - Get full-text RSS feeds
 
+--- 
+
+## Note for this Fork
+
+This is a fork to attempt to try to update everything to modern. I don't plan on implementing features, but PRs are welcome.
+
+---
+
 [Homepage](https://morss.it/) • 
 [Upstream source code](https://git.pictuga.com/pictuga/morss) • 
 [Github mirror](https://github.com/pictuga/morss) (for Issues & Pull requests)
