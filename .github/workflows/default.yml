@@ -4,23 +4,29 @@ on:
     branches:
       - master
 
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  test-lint:
+  pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version-file: ".python-version"
+    - uses: pre-commit/action@v3.0.1
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+    - name: Install the project
+      run: uv sync --all-extras --dev
 
-      - name: Prepare image
-        run: apt-get -y update && apt-get -y install python3-pip libenchant-2-2 aspell-en
-
-      - name: Install dependencies
-        run: pip3 install .[full] .[dev]
-      - run: isort --check-only --diff .
-      - run: pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8
-      - run: pytest --cov=morss tests
+    - name: Run tests
+      # For example, using `pytest`
+      run: uv run pytest tests
 
   build:
     runs-on: ubuntu-latest
@@ -33,7 +39,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
