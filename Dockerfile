@@ -49,6 +49,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
+ENV DEBUG=1
 
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT ["/bin/sh", "/app/morss-helper"]

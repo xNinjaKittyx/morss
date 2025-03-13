@@ -158,7 +158,6 @@ wheels = [
 
 [[package]]
 name = "morss"
-version = "0.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "bs4" },
@@ -194,7 +193,7 @@ requires-dist = [
     { name = "redis", marker = "extra == 'full'", specifier = ">=5.2.1" },
     { name = "setproctitle", marker = "extra == 'full'", specifier = ">=1.3.5" },
 ]
-provides-extras = ["full", "dev"]
+provides-extras = ["dev", "full"]
 
 [[package]]
 name = "packaging"

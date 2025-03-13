@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import logging
 import os
 import re
-import sys
 import time
 from datetime import datetime
 from fnmatch import fnmatch
@@ -30,30 +30,21 @@ from dateutil import tz
 
 from . import caching, crawler, feeds, readabilite
 
+logger = logging.getLogger(__name__)
 
 MAX_ITEM = int(os.getenv("MAX_ITEM", 5))  # cache-only beyond
 MAX_TIME = int(os.getenv("MAX_TIME", 2))  # cache-only after (in sec)
 
+ALLOW_LIMITS = bool(os.getenv("ALLOW_LIMITS", False))
 LIM_ITEM = int(os.getenv("LIM_ITEM", 10))  # deletes what's beyond
 LIM_TIME = int(os.getenv("LIM_TIME", 2.5))  # deletes what's after
 
 DELAY = int(os.getenv("DELAY", 10 * 60))  # xml cache & ETag cache (in sec)
-TIMEOUT = int(os.getenv("TIMEOUT", 4))  # http timeout (in sec)
+TIMEOUT = int(os.getenv("TIMEOUT", 10))  # http timeout (in sec)
 
 
 class MorssException(Exception):
     pass
-
-
-def log(txt):
-    if "DEBUG" in os.environ:
-        if "REQUEST_URI" in os.environ:
-            # when running on Apache
-            open("morss.log", "a").write(f"{txt!r}\n")
-
-        else:
-            # when using internal server or cli
-            print(repr(txt), file=sys.stderr)
 
 
 def len_html(txt):
@@ -105,7 +96,7 @@ def ItemFix(item, options, feedurl="/"):
 
     # check if it includes link
     if not item.link:
-        log("no link")
+        logger.debug(f"Link not found: {item}")
         return item
 
     # wikipedia daily highlight
@@ -113,14 +104,14 @@ def ItemFix(item, options, feedurl="/"):
         match = lxml.html.fromstring(item.desc).xpath("//b/a/@href")
         if len(match):
             item.link = match[0]
-            log(item.link)
+            logger.info(f"Wikipedia Link Detected: {item.link}")
 
     # at user's election, use first <a>
     if options.firstlink and (item.desc or item.content):
         match = lxml.html.fromstring(item.desc or item.content).xpath("//a/@href")
         if len(match):
             item.link = match[0]
-            log(item.link)
+            logger.info(f"Using First Link: {item.link}")
 
     # check relative urls
     item.link = urljoin(feedurl, item.link)
@@ -128,27 +119,27 @@ def ItemFix(item, options, feedurl="/"):
     # google translate
     if fnmatch(item.link, "http://translate.google.*/translate*u=*"):
         item.link = parse_qs(urlparse(item.link).query)["u"][0]
-        log(item.link)
+        logger.info(f"translate.google Detected: {item.link}")
 
     # google
     if fnmatch(item.link, "http://www.google.*/url?q=*"):
         item.link = parse_qs(urlparse(item.link).query)["q"][0]
-        log(item.link)
+        logger.info(f"google Detected: {item.link}")
 
     # google news
     if fnmatch(item.link, "http://news.google.com/news/url*url=*"):
         item.link = parse_qs(urlparse(item.link).query)["url"][0]
-        log(item.link)
+        logger.info(f"news.google Detected: {item.link}")
 
     # pocket
     if fnmatch(item.link, "https://getpocket.com/redirect?url=*"):
         item.link = parse_qs(urlparse(item.link).query)["url"][0]
-        log(item.link)
+        logger.info("getpocket.com Detected: {item.link}")
 
     # facebook
     if fnmatch(item.link, "https://www.facebook.com/l.php?u=*"):
         item.link = parse_qs(urlparse(item.link).query)["u"][0]
-        log(item.link)
+        logger.info("facebook.com Detected: {item.link}")
 
     # feedburner FIXME only works if RSS...
     item.NSMAP["feedburner"] = "http://rssnamespace.org/feedburner/ext/1.0"
@@ -189,14 +180,14 @@ def ItemFix(item, options, feedurl="/"):
             "Z": "Z",
         }
         item.link = "".join([(t[s[0]] if s[0] in t else s[0]) + s[1:] for s in url[1:]])
-        log(item.link)
+        logger.info(f"Using feedsportal: {item.link}")
 
     # reddit
     if urlparse(feedurl).netloc == "www.reddit.com":
         match = lxml.html.fromstring(item.content).xpath('//a[text()="[link]"]/@href')
         if len(match):
             item.link = match[0]
-            log(item.link)
+            logger.info("Reddit Detected: {item.link}")
 
     return item
 
@@ -205,14 +196,13 @@ def ItemFill(item, options, feedurl="/", fast=False):
     """Returns True when it has done its best"""
 
     if not item.link:
-        log("no link")
+        logger.error("No link found.")
         return True
-
-    log(item.link)
 
     # download
 
     if fast or options.cache:
+        logger.debug(f"{fast} or {options.cache}")
         # force cache, don't fetch
         policy = "offline"
 
@@ -224,18 +214,19 @@ def ItemFill(item, options, feedurl="/", fast=False):
         policy = None
 
     try:
+        logger.debug(f"Calling adv_get: {item.link=} {policy=}")
         req = crawler.adv_get(url=item.link, policy=policy, force_min=24 * 60 * 60, timeout=TIMEOUT)
 
-    except (OSError, HTTPException):
-        log("http error")
+    except (OSError, HTTPException) as e:
+        logger.exception(f"Failed to crawl: {e}")
         return False  # let's just delete errors stuff when in cache mode
 
     if req["contenttype"] not in crawler.MIMETYPE["html"] and req["contenttype"] != "text/plain":
-        log("non-text page")
+        logger.info("non-text page")
         return True
 
     if not req["data"]:
-        log("empty page")
+        logger.info("empty page")
         return True
 
     out = readabilite.get_article(
@@ -270,7 +261,7 @@ def ItemAfter(item, options):
     if options.nolink and item.content:
         content = lxml.html.fromstring(item.content)
         for link in content.xpath("//a"):
-            log(link.text_content())
+            logger.info(link.text_content())
             link.drop_tag()
         item.content = lxml.etree.tostring(content, method="html")
 
@@ -337,8 +328,7 @@ def FeedFetch(url, options):
         # contains all fields, otherwise much-needed data can be lost
 
         except TypeError:
-            log("random page")
-            log(req["contenttype"])
+            logger.exception(f"random page: {req['contenttype']}")
             raise MorssException("Link provided is not a valid feed")
 
     return req["url"], rss
@@ -373,8 +363,8 @@ def FeedGather(rss, url, options):
 
     for i, item in enumerate(sorted_items):
         # hard cap
-        if time.time() - start_time > lim_time >= 0 or i + 1 > lim_item >= 0:
-            log("dropped")
+        if ALLOW_LIMITS and (time.time() - start_time > lim_time >= 0 or i + 1 > lim_item >= 0):
+            logger.info("dropped due to limits")
             item.remove()
             continue
 
@@ -386,7 +376,7 @@ def FeedGather(rss, url, options):
         item = ItemFix(item, options, url)
 
         # soft cap
-        if time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0:
+        if ALLOW_LIMITS and (time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0):
             if not options.proxy:
                 if ItemFill(item, options, url, True) is False:
                     item.remove()
@@ -405,8 +395,8 @@ def FeedGather(rss, url, options):
         new.link = "http://www.galler.com/"
         new.time = "5 Oct 2013 22:42"
 
-    log(len(rss.items))
-    log(time.time() - start_time)
+    logger.info(len(rss.items))
+    logger.info(time.time() - start_time)
 
     return rss
 

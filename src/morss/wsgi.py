@@ -16,6 +16,7 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import cgitb
+import logging
 import mimetypes
 import os.path
 import re
@@ -28,8 +29,10 @@ from urllib.parse import unquote
 import lxml.etree
 
 from . import caching, crawler, readabilite
-from .morss import DELAY, TIMEOUT, FeedFetch, FeedFormat, FeedGather, MorssException, Options, log
+from .morss import DELAY, TIMEOUT, FeedFetch, FeedFormat, FeedGather, MorssException, Options
 from .util import data_path
+
+logger = logging.getLogger(__name__)
 
 PORT = int(os.getenv("PORT", 8000))
 
@@ -90,6 +93,9 @@ def cgi_parse_environ(environ):
 
 
 def cgi_app(environ, start_response):
+    from .logging import setup_logger
+
+    setup_logger()
     url, options = cgi_parse_environ(environ)
 
     headers = {}
@@ -252,7 +258,7 @@ def cgi_error_handler(environ, start_response, app):
     except Exception as e:
         headers = {"status": "404 Not Found", "content-type": "text/html", "x-morss-error": repr(e)}
         start_response(headers["status"], list(headers.items()), sys.exc_info())
-        log(f"ERROR: {e!r}")
+        logger.exception(f"ERROR: {e}")
         return [cgitb.html(sys.exc_info())]
 
 
