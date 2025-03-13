@@ -2,7 +2,7 @@ name: default
 on:
   push:
     branches:
-      - master
+      - latest
 
 env:
   # Use docker.io for Docker Hub if empty
