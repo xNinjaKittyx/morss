@@ -5,7 +5,20 @@
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
 		<meta charset="UTF-8" />
 		<link rel="shortcut icon" type="image/svg+xml" href="/logo.svg" sizes="any" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"  />
 		<style type="text/css">
+			.title {
+                font-family: sans-serif;
+				font-weight: bold;
+				color: #000;
+				font-size: 500%;
+			}
+			.catchphrase {
+				font-family: sans-serif;
+				font-style: italic;
+				color: #000;
+				font-size: 100%;
+			}
 			body
 			{
 				padding : 2%;
@@ -17,27 +30,55 @@
 				text-align : center;
 			}
 
-			input
-			{
-				display: block;
-				min-width: 50%;
+			input[type=text]{
+				width:100%;
+				border:2px solid #aaa;
+				border-radius:4px;
+				margin:8px 0;
+				outline:none;
+				padding:8px;
+				box-sizing:border-box;
+				transition:.3s;
+				text-align:center;
+			}
+			::placeholder {
+				text-align: center;
+			}
+			input[type=text]:focus{
+				border-color:dodgerBlue;
+				box-shadow:0 0 8px 0 dodgerBlue;
+			}
+			.custom-button{
 				margin: auto;
-				margin-top: 1em;
-				text-align : center;
+				margin-top:10px;
+				display:block;
+				padding: 10px 10px;
+				font-size: 16px;
+				font-weight: bold;
+				cursor: pointer;
+				border: none;
+				border-radius: 5px;
+				background-color: #fff;
+				color: #000;
+				transition: background-color 0.3s ease;
+				text-align: center;
+			}
+
+			.custom-button:hover {
+				background-color:rgb(110, 110, 110)0;
 			}
 		</style>
 	</head>
 
 	<body>
-		<h1>morss</h1>
+		<h1 class="title">morss</h1>
 
-		<p>Fill your RSS feeds.</p>
+		<p class="catchphrase">Fuel your feeds, amplify your future.</p>
 		<form>
-			<input type="text" id="url" name="url" placeholder="Feed url (http://example.com/feed.xml)" />
+			<input type="text" id="url" name="url" placeholder="Feed URL (https://news.ycombinator.com/rss)" />
 		</form>
 
-		<code>Copyright: pictuga 2013-2020<br/>
-		Source code: https://git.pictuga.com/pictuga/morss</code>
+		<button class='custom-button'><i class='fa-brands fa-github'></i></button>
 
 		<script>
 			form = document.forms[0]

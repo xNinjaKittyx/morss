@@ -1,8 +1,4 @@
-
 from datetime import datetime
-from glob import glob
-import json
-import os
 
 from hatchling.metadata.plugin.interface import MetadataHookInterface
 

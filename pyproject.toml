@@ -34,7 +34,7 @@ dev = [
 
 [project.urls]
 Homepage = "http://morss.it/"
-Repository = "https://git.pictuga.com/pictuga/morss"
+Repository = "https://github.com/xNinjaKittyx/morss"
 "Bug Tracker" = "https://github.com/pictuga/morss/issues"
 
 [project.scripts]

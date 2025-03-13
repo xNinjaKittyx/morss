@@ -9,7 +9,7 @@ Main focus will be the docker image.
 
 For quickstart with docker
 ```
-docker run -it -p 8000:8000 ghcr.io/xninjakittyx/morss:master
+docker run -it -p 8000:8000 ghcr.io/xninjakittyx/morss:latest
 ```
 
 ---
