@@ -7,6 +7,11 @@
 This is a fork to attempt to try to update everything to modern. I don't plan on implementing features, but PRs are welcome.
 Main focus will be the docker image.
 
+For quickstart with docker
+```
+docker run -it -p 8000:8000 ghcr.io/xninjakittyx/morss:master
+```
+
 ---
 
 [Homepage](https://morss.it/) •

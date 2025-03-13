@@ -19,7 +19,7 @@
 
 # pylint: disable=unused-import,unused-variable
 
-__version__ = ""
+__version__ = "20250312.1706"
 
 from .morss import *  # noqa: F403
 from .wsgi import application  # noqa: F401

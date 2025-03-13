@@ -1,6 +1,6 @@
 [project]
 name = "morss"
-version = "0.0.1"
+dynamic = ["version"]
 description = "Get full-text RSS feeds"
 authors = [
     {name = "pictuga", email = "contact@pictuga.com"}
@@ -44,6 +44,8 @@ fetchdata = "betavantage.fetch_data:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata.hooks.custom]
 
 [tool.ruff]
 # Same as Black.
