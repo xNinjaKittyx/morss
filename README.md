@@ -12,6 +12,11 @@ For quickstart with docker
 docker run -it -p 8000:8000 ghcr.io/xninjakittyx/morss:latest
 ```
 
+
+I also gave it a slightly nicer default, minimalistic UI. Of course, the html file is there for you to customize yourself.
+<img width="1706" height="1033" alt="image" src="https://github.com/user-attachments/assets/efc9e0f6-eef0-4742-bb0f-11697d7489dc" />
+
+
 ---
 
 [Homepage](https://morss.it/) •
