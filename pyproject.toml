@@ -37,10 +37,6 @@ Homepage = "http://morss.it/"
 Repository = "https://github.com/xNinjaKittyx/morss"
 "Bug Tracker" = "https://github.com/pictuga/morss/issues"
 
-[project.scripts]
-betavantage = "betavantage.main:main"
-fetchdata = "betavantage.fetch_data:main"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
